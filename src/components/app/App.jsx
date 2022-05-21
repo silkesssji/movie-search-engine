@@ -7,7 +7,7 @@ export class App extends React.Component {
         super(props);
         this.state = {
             data: [],
-            page: 1,
+            page: 4,
             popularBGs: []
         }
     }
