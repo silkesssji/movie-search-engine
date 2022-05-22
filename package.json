@@ -5,7 +5,7 @@
   "main": "index.html",
   "private": true,
   "author": "kastris",
-  "homepage": "https://silkesssji.github.io/movie-search/",
+  "homepage": "https://silkesssji.github.io/movie-search-engine/",
   "license": "ISC",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.4",
