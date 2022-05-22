@@ -34,7 +34,6 @@ export class App extends React.Component {
             `https://api.themoviedb.org/3/trending/movie/week?api_key=00479108b898bdd0ebeed080d6bd33fe&language=en-US&page=${this.state.page}`
         );
         const json = await response.json();
-        this.setState({page: this.state.page + 1});
         this.setState({data: json.results}, () => console.log(this.state.data))
         this.setState({popularBGs: json.results.map(card => card.backdrop_path)})
     }
