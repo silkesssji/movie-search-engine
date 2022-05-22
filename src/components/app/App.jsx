@@ -1,13 +1,14 @@
 import React from 'react';
 
-import styles from "./app.module.scss";
+import main from "./modules/main.module.scss";
+import header from "./modules/header.module.scss";
 
 export class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             data: [],
-            page: 4,
+            page: 1,
             popularBGs: []
         }
     }
@@ -18,14 +19,12 @@ export class App extends React.Component {
             );
             const json = await response.json();
             this.setState({data: json.results});
-            console.log(this.state.data)
         } else {
             const response = await fetch(
                 `https://api.themoviedb.org/3/trending/movie/day?api_key=00479108b898bdd0ebeed080d6bd33fe`
             );
             const json = await response.json();
             this.setState({data: json.results});
-            console.log(this.state.data)
         }
         
     }
@@ -40,11 +39,11 @@ export class App extends React.Component {
     render() {
         return(
             <>
-                <div className={styles.header}>
-                    <h1 className={styles.heading}>MOVIESEARCH</h1>
-                    <input className={styles.input} type="text" placeholder='Search' onInput={this.fetchData}></input>
-                    <div className={styles.header__backgroundContainer}>
-                        <div className={styles.header__background} style={
+                <header className={header.header}>
+                    <h1 className={header.heading}>MOVIESEARCH</h1>
+                    <input className={header.input} type="text" placeholder='Search' onInput={this.fetchData}></input>
+                    <div className={header.header__backgroundContainer}>
+                        <div className={header.header__background} style={
                             {backgroundImage: 
                                 this.state.popularBGs.length ?
                                 `url(https://image.tmdb.org/t/p/original/${this.state.popularBGs[0]})`
@@ -52,38 +51,41 @@ export class App extends React.Component {
                             }
                         }></div>
                     </div>
-                </div>
-                
-                <div className={styles.main}>
-                    <div className={styles.smokeScreen}/>
-                    <div className={styles.mainBG} style={
-                    {backgroundImage: 
-                        this.state.popularBGs.length ?
-                        `url(https://image.tmdb.org/t/p/original/${this.state.popularBGs[0]})`
-                        : "none"
-                    }
-                    }/>
-                    {this.state.data.length !==0 &&
-                    this.state.data.map((result, index) => {
-                        return <div key={index} className={styles.cardContainer}>
-                            <div className={styles.card}
-                            style={
-                                {backgroundImage:
-                                    result.backdrop_path ?
-                                    `url(https://image.tmdb.org/t/p/original/${result.backdrop_path})`
-                                    : "none"
-                                }
-                            }>
+                </header>
+                <main className={main.main}>
+                    <div className={main.cardWrapper}>
+                        {this.state.data.length !==0 &&
+                        this.state.data.map((result, index) => {
+                            return <div key={index} className={main.cardContainer}>
+                                <div className={main.card}
+                                style={
+                                    {backgroundImage:
+                                        result.backdrop_path ?
+                                        `url(https://image.tmdb.org/t/p/original/${result.backdrop_path})`
+                                        : "none"
+                                    }
+                                }>
+                                </div>
+                                <div className={main.cardHeading}>
+                                    <h2 className={main.cardTitle}>
+                                        {result.title && `${result.title} `}
+                                        {result.release_date && `(${result.release_date.split("-")[0]})`}
+                                    </h2>
+                                </div>
                             </div>
-                            <div className={styles.cardHeading}>
-                                <h2 className={styles.cardTitle}>
-                                    {result.title && `${result.title} `}
-                                    {result.release_date && `(${result.release_date.split("-")[0]})`}
-                                </h2>
-                            </div>
-                        </div>
-                    })}
-                </div>
+                        })}
+                    </div>
+                    <div className={main.bgContainer}>
+                        <div className={main.mainBG} style={
+                        {backgroundImage:
+                            this.state.popularBGs.length ?
+                            `url(https://image.tmdb.org/t/p/original/${this.state.popularBGs[0]})`
+                            : "none"
+                        }
+                        }/>
+                        <div className={main.smokeScreen}/>
+                    </div>
+                </main>
             </>
         )
     }
