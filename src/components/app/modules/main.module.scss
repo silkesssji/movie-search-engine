@@ -50,6 +50,8 @@
     width: 200px;
     align-items: center;
     text-transform: uppercase;
+    display: table-cell;
+    -webkit-line-clamp: 3;
 }
 .cardWrapper {
     display: flex;
@@ -84,4 +86,8 @@
     text-transform: uppercase;
     white-space: nowrap;
     transform: translate(-50%, -50%);
+}
+.cardPoster {
+    width: 100%;
+    height: 100%;
 }

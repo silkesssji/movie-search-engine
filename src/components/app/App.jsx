@@ -58,18 +58,8 @@ export class App extends React.Component {
         this.setState({data: json.results});
         let bgNumber = Math.floor(Math.random() * 20);
         this.setState({popularBGs: json.results.map(card => card.backdrop_path)}, () => {
-            this.setState({ currentBG: this.state.popularBGs[bgNumber]});
-            setInterval(() => {
-            const newRandom = (item) => {
-                let result = 0;
-                do {
-                    result = Math.floor(Math.random() * 10);
-                } while (item === result);
-                return result;
-            }
-            bgNumber = newRandom(bgNumber);
-            this.setState({ currentBG: this.state.popularBGs[bgNumber]});
-        }, 30000)})
+            this.setState({currentBG: this.state.popularBGs[bgNumber]})
+        });
         this.setState({totalPages: json.total_pages});
     }
     render() {
@@ -96,9 +86,11 @@ export class App extends React.Component {
                         {this.state.data.length !==0 &&
                         this.state.data.map((result, index) => {
                             return (<div key={index} className={main.cardContainer}>
-                                        {result.poster_path ? <img className={main.card} src={
-                                        `https://image.tmdb.org/t/p/w780/${result.poster_path}`}/> : 
-                                        <div className={main.posterNotFound}>Not Found</div>}
+                                        <div className={main.card}>
+                                            {result.poster_path ? <img className={main.cardPoster} src={
+                                            `https://image.tmdb.org/t/p/w780/${result.poster_path}`}/> : 
+                                            <div className={main.posterNotFound}>Not Found</div>}
+                                        </div>
                                         <div className={main.cardHeading}>
                                             <h2 className={main.cardTitle}>
                                                 {result.title && `${result.title} `}
