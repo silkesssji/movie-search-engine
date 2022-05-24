@@ -5,10 +5,10 @@
     margin: 20px auto;
     background: none;
     display: flex;
+    align-items: center;
     z-index: 2;
 }
 .button {
-    width: 30px;
     height: fit-content;
     text-transform: uppercase;
     color: rgb(47, 47, 47);
@@ -27,7 +27,8 @@
     }
 }
 .current {
-    width: 30px;
+    min-width: fit-content;
+    min-height: fit-content;
     height: fit-content;
     text-transform: uppercase;
     color: rgb(47, 47, 47);
@@ -51,4 +52,10 @@
     &:active {
         background-color: rgb(255, 255, 255);
     }
+}
+.dots {
+    color: rgb(226, 226, 226);
+    display: block;
+    font-size: 35px;
+    height: fit-content;
 }

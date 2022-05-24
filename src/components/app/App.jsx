@@ -69,7 +69,7 @@ export class App extends React.Component {
     }
     componentDidMount = async() => {
         const response = await fetch(
-            `https://api.themoviedb.org/3/trending/movie/week?api_key=00479108b898bdd0ebeed080d6bd33fe&language=en-US&page=${this.state.paginator[0]}`
+            `https://api.themoviedb.org/3/trending/movie/week?api_key=00479108b898bdd0ebeed080d6bd33fe&language=en-US&page=${this.state.page}`
         );
         const json = await response.json();
         this.setState({data: json.results});
@@ -77,7 +77,7 @@ export class App extends React.Component {
         this.setState({popularBGs: json.results.map(card => card.backdrop_path)}, () => {
             this.setState({currentBG: this.state.popularBGs[bgNumber]})
         });
-        this.setState({totalPages: json.total_pages});
+        this.setState({totalPages: json.total_pages}, () => this.fetchData());
     }
     render() {
         return(
@@ -96,12 +96,14 @@ export class App extends React.Component {
                 <main className={main.main}>
                     <div className={paginator.paginator}>
                         {<button type='button' disabled={this.state.paginator[0]===1} className={cn(paginator.button, this.state.paginator[0]===1 ? paginator.disabled : '')} value={"back"} onClick={this.changePage}>{'<'}</button>}
-                        <button type='button' className={cn(paginator.button, this.state.page === this.state.paginator[0]?paginator.current:'')} onClick={this.changePage} value={this.state.paginator[0]}>{this.state.paginator[0]}</button>
-                        <button type='button' className={cn(paginator.button, this.state.page === this.state.paginator[1]?paginator.current:'')} onClick={this.changePage} value={this.state.paginator[1]}>{this.state.paginator[1]}</button>
-                        <button type='button' className={cn(paginator.button, this.state.page === this.state.paginator[2]?paginator.current:'')} onClick={this.changePage} value={this.state.paginator[2]}>{this.state.paginator[2]}</button>
-                        <button type='button' className={cn(paginator.button, this.state.page === this.state.paginator[3]?paginator.current:'')} onClick={this.changePage} value={this.state.paginator[3]}>{this.state.paginator[3]}</button>
-                        <button type='button' className={cn(paginator.button, this.state.page === this.state.paginator[4]?paginator.current:'')} onClick={this.changePage} value={this.state.paginator[4]}>{this.state.paginator[4]}</button>
-                        {<button type='button' disabled={!(this.state.totalPages > this.state.paginator[0])} className={cn(paginator.button, !(this.state.totalPages > this.state.paginator[0]) ? paginator.disabled : '')} value={"forward"} onClick={this.changePage}>{'>'}</button>}
+                        {this.state.paginator[0] < this.state.totalPages && !(this.state.totalPages === 0) && <button type='button' className={cn(paginator.button, this.state.page === this.state.paginator[0]?paginator.current:'')} onClick={this.changePage} value={this.state.paginator[0]}>{this.state.paginator[0]}</button>}
+                        {this.state.paginator[1] < this.state.totalPages && <button type='button' className={cn(paginator.button, this.state.page === this.state.paginator[1]?paginator.current:'')} onClick={this.changePage} value={this.state.paginator[1]}>{this.state.paginator[1]}</button>}
+                        {this.state.paginator[2] < this.state.totalPages && <button type='button' className={cn(paginator.button, this.state.page === this.state.paginator[2]?paginator.current:'')} onClick={this.changePage} value={this.state.paginator[2]}>{this.state.paginator[2]}</button>}
+                        {this.state.paginator[3] < this.state.totalPages && <button type='button' className={cn(paginator.button, this.state.page === this.state.paginator[3]?paginator.current:'')} onClick={this.changePage} value={this.state.paginator[3]}>{this.state.paginator[3]}</button>}
+                        {this.state.paginator[4] < this.state.totalPages && <button type='button' className={cn(paginator.button, this.state.page === this.state.paginator[4]?paginator.current:'')} onClick={this.changePage} value={this.state.paginator[4]}>{this.state.paginator[4]}</button>}
+                        {!(this.state.paginator.includes(this.state.totalPages - 1) || this.state.paginator.includes(this.state.totalPages) || (this.state.totalPages === 0)) && <div className={paginator.dots}>...</div>}
+                        {!(this.state.totalPages === 0) && <button type='button' disabled={this.state.page === this.state.totalPages} className={cn(paginator.button, this.state.page === this.state.totalPages?paginator.current:'')} onClick={this.changePage} value={this.state.totalPages}>{this.state.totalPages}</button>}
+                        {<button type='button' disabled={!(this.state.totalPages > this.state.paginator[this.state.paginator.length - 1])} className={cn(paginator.button, !(this.state.totalPages > this.state.paginator[this.state.paginator.length - 1]) ? paginator.disabled : '')} value={"forward"} onClick={this.changePage}>{'>'}</button>}
                     </div>
                     <div className={main.cardWrapper}>
                         {this.state.data.length !==0 &&
@@ -135,12 +137,14 @@ export class App extends React.Component {
                     </div>
                     <div className={paginator.paginator}>
                         {<button type='button' disabled={this.state.paginator[0]===1} className={cn(paginator.button, this.state.paginator[0]===1 ? paginator.disabled : '')} value={"back"} onClick={this.changePage}>{'<'}</button>}
-                        <button type='button' className={cn(paginator.button, this.state.page === this.state.paginator[0]?paginator.current:'')} onClick={this.changePage} value={this.state.paginator[0]}>{this.state.paginator[0]}</button>
-                        <button type='button' className={cn(paginator.button, this.state.page === this.state.paginator[1]?paginator.current:'')} onClick={this.changePage} value={this.state.paginator[1]}>{this.state.paginator[1]}</button>
-                        <button type='button' className={cn(paginator.button, this.state.page === this.state.paginator[2]?paginator.current:'')} onClick={this.changePage} value={this.state.paginator[2]}>{this.state.paginator[2]}</button>
-                        <button type='button' className={cn(paginator.button, this.state.page === this.state.paginator[3]?paginator.current:'')} onClick={this.changePage} value={this.state.paginator[3]}>{this.state.paginator[3]}</button>
-                        <button type='button' className={cn(paginator.button, this.state.page === this.state.paginator[4]?paginator.current:'')} onClick={this.changePage} value={this.state.paginator[4]}>{this.state.paginator[4]}</button>
-                        {<button type='button' disabled={!(this.state.totalPages > this.state.paginator[0])} className={cn(paginator.button, !(this.state.totalPages > this.state.paginator[0]) ? paginator.disabled : '')} value={"forward"} onClick={this.changePage}>{'>'}</button>}
+                        {this.state.paginator[0] < this.state.totalPages && !(this.state.totalPages === 0) && <button type='button' className={cn(paginator.button, this.state.page === this.state.paginator[0]?paginator.current:'')} onClick={this.changePage} value={this.state.paginator[0]}>{this.state.paginator[0]}</button>}
+                        {this.state.paginator[1] < this.state.totalPages && <button type='button' className={cn(paginator.button, this.state.page === this.state.paginator[1]?paginator.current:'')} onClick={this.changePage} value={this.state.paginator[1]}>{this.state.paginator[1]}</button>}
+                        {this.state.paginator[2] < this.state.totalPages && <button type='button' className={cn(paginator.button, this.state.page === this.state.paginator[2]?paginator.current:'')} onClick={this.changePage} value={this.state.paginator[2]}>{this.state.paginator[2]}</button>}
+                        {this.state.paginator[3] < this.state.totalPages && <button type='button' className={cn(paginator.button, this.state.page === this.state.paginator[3]?paginator.current:'')} onClick={this.changePage} value={this.state.paginator[3]}>{this.state.paginator[3]}</button>}
+                        {this.state.paginator[4] < this.state.totalPages && <button type='button' className={cn(paginator.button, this.state.page === this.state.paginator[4]?paginator.current:'')} onClick={this.changePage} value={this.state.paginator[4]}>{this.state.paginator[4]}</button>}
+                        {!(this.state.paginator.includes(this.state.totalPages - 1) || this.state.paginator.includes(this.state.totalPages) || (this.state.totalPages === 0)) && <div className={paginator.dots}>...</div>}
+                        {!(this.state.totalPages === 0) && <button type='button' disabled={this.state.page === this.state.totalPages} className={cn(paginator.button, this.state.page === this.state.totalPages?paginator.current:'')} onClick={this.changePage} value={this.state.totalPages}>{this.state.totalPages}</button>}
+                        {<button type='button' disabled={!(this.state.totalPages > this.state.paginator[this.state.paginator.length - 1])} className={cn(paginator.button, !(this.state.totalPages > this.state.paginator[this.state.paginator.length - 1]) ? paginator.disabled : '')} value={"forward"} onClick={this.changePage}>{'>'}</button>}
                     </div>
                 </main>
             </>
