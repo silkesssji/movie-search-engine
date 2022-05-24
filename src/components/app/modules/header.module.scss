@@ -8,7 +8,7 @@
 }
 .heading {
     font-size: 60px;
-    margin: 0 auto 10px;
+    margin: -8px auto 10px;
     color: white;
     text-shadow: rgb(0, 0, 0) 0 0 10px;
     width: fit-content;
@@ -25,6 +25,7 @@
     border-radius: 5px;
     display: block;
     padding: 0px 16px;
+    box-shadow: rgb(0 0 0) 0 0 10px;
     &::placeholder {
         font-family: Arial, Helvetica, sans-serif;
     }
