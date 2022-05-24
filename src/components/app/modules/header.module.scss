@@ -1,47 +1,30 @@
 .header {
     width: 100%;
-    height: 300px;
-    position: relative;
-}
-.header__backgroundContainer {
-    width: 100%;
-    height: 100%;
-}
-.header__background {
-    width: 100%;
+    height: fit-content;
+    padding: 30px 0;
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
-    height: 100%;
-    z-index: -1;
-    box-shadow: 0px 100px 200px rgba(0, 0, 0, 0.579);
 }
 .heading {
-    position: absolute;
-    left: 50%;
-    top: 18%;
     font-size: 60px;
-    transform: translate(-50%, -50%);
+    margin: 0 auto 10px;
     color: white;
-    z-index: 1;
-    text-shadow: rgb(0, 0, 0) 3px 5px 3px;
+    text-shadow: rgb(0, 0, 0) 0 0 10px;
+    width: fit-content;
 }
 .input {
     line-height: 1.5;
     font-family: Arial, Helvetica, sans-serif;
-    position: absolute;
-    transform: translate(-50%, -50%);
-    z-index: 2;
-    left: 50%;
-    top: 65%;
     width: 500px;
     height: 40px;
     font-size: 20px;
     outline: none;
     border: none;
+    margin: 0 auto;
     border-radius: 5px;
+    display: block;
     padding: 0px 16px;
-    box-shadow: 0px 100px 200px rgba(0, 0, 0, 0.579);
     &::placeholder {
         font-family: Arial, Helvetica, sans-serif;
     }
