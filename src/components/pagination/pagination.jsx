@@ -2,77 +2,90 @@ import React from 'react';
 import pagination from "./modules/pagination.module.scss";
 import cn from 'classnames';
 
-export class Pagination extends React.Component {
-    constructor(props) {
-        super(props);
+const range = (from, to) => {
+    if (to >= from) {
+        return Array.from({ length: to - from + 1 }).map((_, index) => index + from);
     }
-    render() {
-        let pages = [];
-        for (let i = this.props.page + 1; i <= this.props.page + 5; i++) {
-            pages.push
-        }
-        return(
-            <div className={pagination.pagination}>
-                {!this.props.pages.includes(1) && this.props.totalPages != 0 && 
-                    <>
-                        <button 
-                        type='button' 
-                        className={cn(pagination.button, this.props.page === 1 ? pagination.current : '')}
-                        value={1} 
-                        onClick={this.props.changePage}
-                        >
-                            {1}
-                        </button>
-                        <div className={pagination.dots}>...</div>
-                    </>
-                }
-                <button 
-                    type='button' 
-                    disabled={this.props.pages[0] === 1} 
-                    className={cn(pagination.button, this.props.pages[0]===1 ? pagination.disabled : '')} 
-                    value={"back"} onClick={this.props.changePage}
-                >
-                    {'<'}
-                </button>
-                {this.props.pages.map((elem, index) => {
-                    if (!(elem > this.props.totalPages)) {
-                        return <button 
-                        type='button' 
-                        value={elem}
-                        className={cn(pagination.button, this.props.page === this.props.pages[index] ? pagination.current : '')}
-                        onClick={this.props.changePage}
-                        >
-                        {elem}
-                        </button>
-                    } else {
-                        return null
-                    }}
-                )}
-                <button 
-                    type='button' 
-                    disabled={!(this.props.totalPages > this.props.pages[this.props.pages.length - 1])} 
-                    className={cn(
-                        pagination.button, !(this.props.totalPages > this.props.pages[this.props.pages.length - 1]) ? pagination.disabled : ''
-                    )} 
-                    value={"forward"} 
-                    onClick={this.props.changePage}
+    return Array.from({ length: from - to + 1 }).map((_, index) => from - index);
+};
+
+const generatePagination = (currentPage, totalPages, maxItems) => {
+    if (totalPages < 1 || maxItems < 6) {
+        return [];
+    }
+    if (totalPages <= maxItems) {
+        return range(1, totalPages)
+            .map((index) => ({ type: 'page', value: index }));
+    }
+
+    const lastIndex = maxItems - 1;
+    const endDelimiterIndex = lastIndex - 1;
+    const middle = Math.floor(maxItems / 2);
+    if (currentPage <= middle + 1) {
+        const pagination = range(1, maxItems).map(index => ({ type: 'page', value: index }))
+        pagination[endDelimiterIndex] = ({ type: 'delimeter' });
+        pagination[lastIndex].value = totalPages;
+        return pagination;
+    }
+
+    const isMaxItemsEven = maxItems % 2 === 0;
+    let offset = isMaxItemsEven ? -1 : 0;
+    if (currentPage + middle > totalPages) {
+        offset += currentPage + middle - totalPages;
+    }
+    const pagination = range(currentPage - middle - offset, Math.min(currentPage + middle, totalPages))
+        .map(index => ({ type: 'page', value: index }));
+    pagination[0] = ({ type: 'page', value: 1 });
+    pagination[1] = ({ type: 'delimeter' });
+    pagination[lastIndex].value = totalPages;
+    if (pagination[endDelimiterIndex].value !== totalPages - 1) {
+        pagination[endDelimiterIndex] = ({ type: 'delimeter' });
+    }
+    return pagination;
+};
+
+export const Pagination = ({
+    totalPages,
+    page,
+    changePage,
+}) => {
+    return(
+        <div className={pagination.pagination}>
+            <button 
+                type='button' 
+                disabled={page === 1} 
+                className={cn(pagination.button, {[pagination.disabled]: page === 1})}
+                onClick={() => changePage(page - 1)}
+            >
+                {'<'}
+            </button>
+            {generatePagination(page, totalPages, 9)
+                .map((elem, index) => elem.type === "page" ? (
+                    <button
+                        key={index}
+                        type="buton"
+                        value={elem.value}
+                        className={cn(pagination.button, {
+                            [pagination.current]: elem.value === page
+                        })}
+                        onClick={() => changePage(elem.value)}
                     >
-                    {'>'}
-                </button>
-                {!this.props.pages.includes(this.props.totalPages) && this.props.totalPages != 0 && 
-                <>
-                    <div className={pagination.dots}>...</div>
-                    <button 
-                    type='button' 
-                    className={cn(pagination.button, this.props.page === this.props.totalPages ? pagination.current : '')}
-                    value={this.props.totalPages} 
-                    onClick={this.props.changePage}
-                    >
-                        {this.props.totalPages}
+                        {elem.value}
                     </button>
-                </>
-                }           
-             </div>
-        )
-    }
+                ) : (
+                    <div key={index} className={pagination.dots}>...</div>
+                )
+            )}
+            <button 
+                type='button' 
+                disabled={totalPages === page} 
+                className={cn(
+                    pagination.button, {[pagination.disabled]: page === totalPages}
+                )}
+                onClick={() => changePage(page + 1)}
+            >   
+                {'>'}
+            </button>      
+        </div>
+    )
 }
