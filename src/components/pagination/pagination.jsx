@@ -11,18 +11,21 @@ export class Pagination extends React.Component {
         for (let i = this.props.page + 1; i <= this.props.page + 5; i++) {
             pages.push
         }
-        console.log(pages)
         return(
             <div className={pagination.pagination}>
-                {this.props.totalPages != 0 && <button 
-                    type='button' 
-                    className={cn(pagination.button, this.props.page === 1 ? pagination.current : '')}
-                    value={1} 
-                    onClick={this.props.changePage}
-                >
-                    {1}
-                </button>}
-                <div className={pagination.dots}>...</div>
+                {!this.props.pages.includes(1) && this.props.totalPages != 0 && 
+                    <>
+                        <button 
+                        type='button' 
+                        className={cn(pagination.button, this.props.page === 1 ? pagination.current : '')}
+                        value={1} 
+                        onClick={this.props.changePage}
+                        >
+                            {1}
+                        </button>
+                        <div className={pagination.dots}>...</div>
+                    </>
+                }
                 <button 
                     type='button' 
                     disabled={this.props.pages[0] === 1} 
@@ -56,16 +59,20 @@ export class Pagination extends React.Component {
                     >
                     {'>'}
                 </button>
-                <div className={pagination.dots}>...</div>
-                {this.props.totalPages != 0 && <button 
+                {!this.props.pages.includes(this.props.totalPages) && this.props.totalPages != 0 && 
+                <>
+                    <div className={pagination.dots}>...</div>
+                    <button 
                     type='button' 
                     className={cn(pagination.button, this.props.page === this.props.totalPages ? pagination.current : '')}
                     value={this.props.totalPages} 
                     onClick={this.props.changePage}
-                >
-                    {this.props.totalPages}
-                </button>}
-            </div>
+                    >
+                        {this.props.totalPages}
+                    </button>
+                </>
+                }           
+             </div>
         )
     }
 }
