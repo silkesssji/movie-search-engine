@@ -2,6 +2,7 @@ import React from 'react';
 import pagination from "./modules/pagination.module.scss";
 import cn from 'classnames';
 
+
 const range = (from, to) => {
     if (to >= from) {
         return Array.from({ length: to - from + 1 }).map((_, index) => index + from);
@@ -44,17 +45,18 @@ const generatePagination = (currentPage, totalPages, maxItems) => {
     return pagination;
 };
 
+
 export const Pagination = ({
     totalPages,
     page,
     changePage,
 }) => {
-    return(
+    return (
         <div className={pagination.pagination}>
-            <button 
-                type='button' 
-                disabled={page === 1} 
-                className={cn(pagination.button, {[pagination.disabled]: page === 1})}
+            <button
+                type='button'
+                disabled={page === 1}
+                className={cn(pagination.button, { [pagination.disabled]: page === 1 })}
                 onClick={() => changePage(page - 1)}
             >
                 {'<'}
@@ -75,17 +77,17 @@ export const Pagination = ({
                 ) : (
                     <div key={index} className={pagination.dots}>...</div>
                 )
-            )}
-            <button 
-                type='button' 
-                disabled={totalPages === page} 
+                )}
+            <button
+                type='button'
+                disabled={(totalPages === page) || (totalPages === 0)}
                 className={cn(
-                    pagination.button, {[pagination.disabled]: page === totalPages}
+                    pagination.button, { [pagination.disabled]: (page === totalPages) || (totalPages === 0) }
                 )}
                 onClick={() => changePage(page + 1)}
-            >   
+            >
                 {'>'}
-            </button>      
+            </button>
         </div>
     )
 }
