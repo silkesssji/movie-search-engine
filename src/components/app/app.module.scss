@@ -18,6 +18,17 @@
     height: 100%;
     overflow: hidden;
 }
+.moviesNotFound {
+    z-index: 1;
+    font-size: 20px;
+    color: rgb(61, 61, 61);
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    width: fit-content;
+    margin: 30px auto 0;
+    line-height: 1.5;
+}
 
 .bg {
     background-size: cover;

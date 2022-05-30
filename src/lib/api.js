@@ -1,17 +1,25 @@
+const apiKey = '00479108b898bdd0ebeed080d6bd33fe';
+
+export const controller = new AbortController();
+
 export const api = {
-    key: '00479108b898bdd0ebeed080d6bd33fe',
-    async search(requestValue, page) {
-        let result;
-        result = await fetch(
-            `https://api.themoviedb.org/3/search/movie?api_key=${this.key}&language=en-US&query=${requestValue}&page=${page}&include_adult=false`
+    _path: 'https://api.themoviedb.org/3',
+    async search(requestValue, page, signal) {
+        const response = await fetch(
+            `${this._path}/search/movie?api_key=${apiKey}&language=en-US&query=${requestValue}&page=${page}&include_adult=false`,
+            {
+                signal,
+            }
         );
-        return result.json();
+        return response.json();
     },
-    async trends(type = 'day', page) {
-        let result;
-        result = await fetch(
-            `https://api.themoviedb.org/3/trending/movie/${type}?api_key=${this.key}&page=${page}`
+    async trends(type = 'day', page, signal) {
+        const response = await fetch(
+            `${this._path}/trending/movie/${type}?api_key=${apiKey}&page=${page}`,
+            {
+                signal
+            }
         )
-        return result.json();
+        return response.json();
     }
 }

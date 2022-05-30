@@ -17,13 +17,17 @@ export const Header = ({
             }
         >
             <h1 className={header.heading}>MOVIESEARCH</h1>
-            <input
-                className={header.input}
-                type="search"
-                placeholder='Search'
-                autoComplete="on"
-                onChange={changeRequest}
-            />
+            <form autoComplete="on">
+                <input
+                    className={header.input}
+                    type="search"
+                    id='searchInput'
+                    name='title'
+                    autoComplete="on"
+                    placeholder='Search'
+                    onChange={changeRequest}
+                />
+            </form>
         </header>
     )
 }

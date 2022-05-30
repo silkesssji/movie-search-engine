@@ -21,19 +21,28 @@ export class App extends React.Component {
         }
     }
 
-    fetchData = async () => {
-        this.setState({ loading: true });
+    fetchData = async() => {
+        this.setState({ loading: true })
+
+        if (this.abort) {
+            this.abort.abort();
+        }
+
+        this.abort = new AbortController();
+
         let requestedResponse;
+
         if (this.state.requestValue !== '') {
-            requestedResponse = await api.search(this.state.requestValue, this.state.page)
+            requestedResponse = await api.search(this.state.requestValue, this.state.page, this.abort.signal);
         } else {
-            requestedResponse = await api.trends('day', this.state.page)
+            requestedResponse = await api.trends('day', this.state.page, this.abort.signal)
         }
         this.setState({
             totalPages: requestedResponse.total_pages,
             movies: requestedResponse.results,
         });
         this.setState({ loading: false });
+        this.abort = null;
     }
 
     changePage = (page) => {
@@ -60,12 +69,16 @@ export class App extends React.Component {
     }
 
     componentDidMount = async () => {
-        this.fetchData();
-        let popularMoviesResponce = await fetch(
-            `https://api.themoviedb.org/3/trending/movie/day?api_key=00479108b898bdd0ebeed080d6bd33fe&page=${this.state.page}`
-        );
-        let popularMovies = await popularMoviesResponce.json();
-        this.setState({ backgroundPath: popularMovies.results[Math.floor(Math.random() * 20)].poster_path });
+        this.abort = new AbortController();
+        this.setState({ loading: true });
+        const requestedResponse = await api.trends('day', 1, this.abort.signal);
+        this.setState({
+            totalPages: requestedResponse.total_pages,
+            movies: requestedResponse.results,
+            loading: false,
+            backgroundPath: requestedResponse.results[Math.floor(Math.random() * 20)].poster_path
+        });
+        this.abort = null;
     }
 
     render() {
@@ -78,10 +91,9 @@ export class App extends React.Component {
                         page={this.state.page}
                         changePage={this.changePage}
                     />
-                    {
-                        this.state.loading ? <Skeleton /> :
-                            <Movies movies={this.state.movies} />
-                    }
+                        {this.state.loading && Boolean(this.state.movies.length) && <Skeleton />}
+                        {this.state.movies.length ? <Movies movies={this.state.movies}/>
+                        : <div className={app.moviesNotFound}>Ничего не найдено</div>}
                     <div className={app.bgwrapper}>
                         <div className={app.smoke} />
                         <div className={app.bg}
