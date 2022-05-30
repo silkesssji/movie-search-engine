@@ -1,25 +1,13 @@
 import React from 'react';
 
-import main from "./modules/main.module.scss";
+import app from "./app.module.scss";
 import { Pagination } from '../pagination/pagination';
 import { Movies } from '../movies/movies';
 import { Footer } from '../footer/footer';
 import { Header } from '../header/header';
 import { Skeleton } from '../skeleton/skeleton';
-
-
-function debounce(fn, delay) {
-    let timer = null;
-    return function () {
-        const context = this;
-        const args = arguments;
-        clearTimeout(timer);
-        timer = setTimeout(function () {
-            fn.apply(context, args);
-        }, delay);
-    };
-}
-
+import { debounce } from '../../lib/debounce';
+import { api } from '../../lib/api';
 
 export class App extends React.Component {
     constructor(props) {
@@ -37,18 +25,13 @@ export class App extends React.Component {
         this.setState({ loading: true });
         let requestedResponse;
         if (this.state.requestValue !== '') {
-            requestedResponse = await fetch(
-                `https://api.themoviedb.org/3/search/movie?api_key=00479108b898bdd0ebeed080d6bd33fe&language=en-US&query=${this.state.requestValue}&page=${this.state.page}&include_adult=false`
-            );
+            requestedResponse = await api.search(this.state.requestValue, this.state.page)
         } else {
-            requestedResponse = await fetch(
-                `https://api.themoviedb.org/3/trending/movie/day?api_key=00479108b898bdd0ebeed080d6bd33fe&page=${this.state.page}`
-            );
+            requestedResponse = await api.trends('day', this.state.page)
         }
-        const json = await requestedResponse.json();
         this.setState({
-            totalPages: json.total_pages,
-            movies: json.results,
+            totalPages: requestedResponse.total_pages,
+            movies: requestedResponse.results,
         });
         this.setState({ loading: false });
     }
@@ -88,20 +71,20 @@ export class App extends React.Component {
     render() {
         return (
             <>
-                <Header backgroundPath={this.state.backgroundPath} changeRequest={this.changeRequest}/>
-                <main className={main.main}>
+                <Header backgroundPath={this.state.backgroundPath} changeRequest={this.changeRequest} />
+                <main className={app.main}>
                     <Pagination
                         totalPages={this.state.totalPages}
                         page={this.state.page}
                         changePage={this.changePage}
                     />
                     {
-                    this.state.loading ? <Skeleton/> : 
-                    <Movies movies={this.state.movies}/>
+                        this.state.loading ? <Skeleton /> :
+                            <Movies movies={this.state.movies} />
                     }
-                    <div className={main.bgwrapper}>
-                        <div className={main.smoke} />
-                        <div className={main.bg}
+                    <div className={app.bgwrapper}>
+                        <div className={app.smoke} />
+                        <div className={app.bg}
                             style={
                                 {
                                     backgroundImage:
@@ -109,8 +92,7 @@ export class App extends React.Component {
                                             `url(https://image.tmdb.org/t/p/original/${this.state.backgroundPath}`
                                         ) : (
                                             "none"
-                                        ),
-                                    transition: 'background-image 0.5s ease',
+                                        )
                                 }
                             }
                         />
@@ -121,7 +103,7 @@ export class App extends React.Component {
                         changePage={this.changePage}
                     />
                 </main>
-                <Footer/>
+                <Footer />
             </>
         )
     }

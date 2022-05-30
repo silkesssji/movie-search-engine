@@ -1,5 +1,5 @@
 import React from 'react';
-import skeleton from './modules/skeleton.module.scss'
+import skeleton from './skeleton.module.scss'
 
 const skeletonArray = Array.from({ length: 20 })
 
@@ -9,10 +9,10 @@ export const Skeleton = () => {
             {skeletonArray
                 .map((_, index) => {
                     return (
-                    <div key={index} className={skeleton.cardContainer}>
-                        <div className={skeleton.card}/>
-                        <div className={skeleton.cardHeading}/>
-                    </div>
+                        <div key={index} className={skeleton.cardContainer}>
+                            <div className={skeleton.card}/>
+                            <div className={skeleton.cardHeading}/>
+                        </div>
                     )
                 })
             }

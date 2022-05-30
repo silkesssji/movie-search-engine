@@ -1,5 +1,5 @@
 import React from 'react';
-import header from "./modules/header.module.scss";
+import header from "./header.module.scss";
 
 export const Header = ({
     backgroundPath, changeRequest
@@ -9,11 +9,9 @@ export const Header = ({
             style={
                 {
                     backgroundImage:
-                        backgroundPath.length ? (
-                            `url(https://image.tmdb.org/t/p/original/${backgroundPath}`
-                        ) : (
-                            "none"
-                        ),
+                        backgroundPath.length 
+                            ? `url(https://image.tmdb.org/t/p/original/${backgroundPath}`
+                            :  "none",
                     transition: 'background-image 1s ease',
                 }
             }

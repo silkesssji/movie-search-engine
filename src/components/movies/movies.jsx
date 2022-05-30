@@ -1,5 +1,5 @@
 import React from 'react';
-import moviesStyle from './modules/movies.module.scss'
+import moviesStyle from './movies.module.scss'
 
 export const Movies = ({
     movies
