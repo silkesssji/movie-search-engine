@@ -4,9 +4,9 @@ export const controller = new AbortController();
 
 export const api = {
     _path: 'https://api.themoviedb.org/3',
-    async search(requestValue, page, signal) {
+    async search(requestValue, page, adult, signal) {
         const response = await fetch(
-            `${this._path}/search/movie?api_key=${apiKey}&language=en-US&query=${requestValue}&page=${page}&include_adult=false`,
+            `${this._path}/search/movie?api_key=${apiKey}&language=en-US&query=${requestValue}&page=${page}&include_adult=${adult}`,
             {
                 signal,
             }

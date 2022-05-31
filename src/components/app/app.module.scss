@@ -1,15 +1,17 @@
-.main {
-    position: relative;
+.wrapper {
     display: flex;
     flex-direction: column;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
-    background-color: black;
     z-index: 0;
-    min-height: 100%;
-    min-width: 100%;
     min-height: calc(100vh - 80px);
+    width: 80%;
+    padding: 0 100px;
+    align-items: center;
+}
+.main {
+    display: flex;
+    position: relative;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.492);
 }
 
 .bgwrapper {
@@ -17,6 +19,7 @@
     position: absolute;
     height: 100%;
     overflow: hidden;
+    z-index: -1;
 }
 .moviesNotFound {
     z-index: 1;
@@ -29,7 +32,6 @@
     margin: 30px auto 0;
     line-height: 1.5;
 }
-
 .bg {
     background-size: cover;
     background-repeat: no-repeat;
@@ -38,4 +40,10 @@
     height: 100%;
     filter: blur(50px);
 }
-
+.filtersWrapper {
+    z-index: 2;
+    height: 1000px;
+    width: 20%;
+    position: relative;
+    margin: 40px 0 0;
+}
