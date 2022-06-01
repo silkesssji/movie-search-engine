@@ -1,6 +1,6 @@
 import React from 'react';
 import cn from 'classnames';
-import "./checkbox.module.scss";
+import "./checkbox.scss";
 
 export const Checkbox = ({
     id, label, checked, value, onChange
@@ -17,13 +17,7 @@ export const Checkbox = ({
                 onChange={onChange}
                 value={value}
             />
-            {value !== "adult" &&
-                <div className='filter-panel__content'>
-                    <button className='filter-panel__only-filter-button' 
-                        type='button'
-                        onClick={onFilter}>Только
-                    </button>
-                </div>}
+            <div className='filter-panel__content'/>
             {label}
         </label>
     )

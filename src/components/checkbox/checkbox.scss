@@ -29,20 +29,22 @@
         cursor: pointer;
         font-style: normal;
         font-weight: 400;
-        font-size: 13px;
+        font-size: 20px;
         line-height: 20px;
         color: #4A4A4A;
         cursor: pointer;
         position: relative;
         width: 100%;
+        margin: 5px 0;
         &--checked {
             outline: none;
         }
         &:focus-within {
-            background-color: #F1FCFF;
+            background-color: #d6d6d6;
+            border-radius: 5px;
         }
         &:hover {
-            background-color: #F1FCFF;
+            // background-color: #F1FCFF;
             .filter-panel__only-filter-button {
                 display: block;
                 opacity: 100%;
@@ -85,7 +87,7 @@
     }
     &__content {
         position: relative;
-        border: 1px solid #2196F3;
+        border: 1px solid #000000;
         width: 20px;
         height: 20px;
         border-radius: 2px;

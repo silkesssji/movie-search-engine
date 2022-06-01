@@ -6,7 +6,7 @@ import { Movies } from '../movies/movies';
 import { Footer } from '../footer/footer';
 import { Header } from '../header/header';
 import { Skeleton } from '../skeleton/skeleton';
-import { Filters } from '../filters/filtres';
+import { Filters } from '../filters/filters';
 import { debounce } from '../../lib/debounce';
 import { api } from '../../lib/api';
 
@@ -19,7 +19,9 @@ export class App extends React.Component {
             backgroundPath: '',
             requestValue: '',
             totalPages: 1, 
-            adult: false
+            adult: false,
+            allGenres: false,
+            choosedGenres: ['']
         }
     }
 
@@ -64,9 +66,17 @@ export class App extends React.Component {
     }, 300)
 
     componentDidUpdate(_, prevState) {
-        const { page, requestValue, adult } = this.state;
-        if (page !== prevState.page || requestValue !== prevState.requestValue || adult !==prevState.adult) {
+        const { page, requestValue, adult} = this.state;
+        if (page !== prevState.page || requestValue !== prevState.requestValue || (adult !==prevState.adult && requestValue!=='')) {
             this.fetchData();
+        }
+    }
+
+    checkEqualityOfGenres = () => {
+        if (this.genres.reduce((acc, cur) => acc && this.state.choosedGenres.includes(cur), true)) {
+            this.setState({ allGenres: true })
+        } else {
+            this.setState({ allGenres: false })
         }
     }
 
@@ -74,10 +84,38 @@ export class App extends React.Component {
         const value = e.target.value;
         if (value === "adult") {
             this.setState({ adult: !this.state.adult })
+        } else if (value === "All") {
+            this.setState({ 
+                allGenres: !this.state.allGenres,
+                choosedGenres: [...this.genres]
+            }, () => {
+                if (this.state.allGenres) {
+                    this.setState({ choosedGenres: [...this.genres]})
+                } else {
+                    this.setState({ choosedGenres: []})
+                }
+            })
+        } else {
+            if (this.state.choosedGenres.includes(value)) {
+                this.setState({ choosedGenres: this.state.choosedGenres.filter((elem) => elem !== value)}, () => this.checkEqualityOfGenres())
+            } else {
+                this.setState({ choosedGenres: [...this.state.choosedGenres, e.target.value]}, () => this.checkEqualityOfGenres())
+            }
         }
     }
 
+    getGenres = async() => {
+        const response = await fetch('https://api.themoviedb.org/3/genre/movie/list?api_key=00479108b898bdd0ebeed080d6bd33fe&language=en-US')
+        const json = await response.json();
+        const genres = json.genres;
+        this.genres = [...genres.map((elem) => elem.name)];
+    } 
+
     componentDidMount = async () => {
+        await this.getGenres();
+        if (this.state.allGenres) {
+            this.setState({ choosedGenres: [...this.genres] })
+        }
         this.abort = new AbortController();
         this.setState({ loading: true });
         const requestedResponse = await api.trends('day', 1, this.abort.signal);
@@ -96,7 +134,13 @@ export class App extends React.Component {
                 <Header backgroundPath={this.state.backgroundPath} changeRequest={this.changeRequest} />
                 <main className={app.main}>
                     <div className={app.filtersWrapper}>
-                        <Filters onChange={this.handleCheckboxChange}/>
+                        {this.genres && 
+                            <Filters 
+                            onChange={this.handleCheckboxChange} 
+                            existingGenres={this.genres} 
+                            choosedGenres={this.state.choosedGenres}
+                            allCheckbox={this.state.allGenres}
+                            />}
                     </div>
                     <div className={app.wrapper}>
                         <Pagination
@@ -104,9 +148,12 @@ export class App extends React.Component {
                             page={this.state.page}
                             changePage={this.changePage}
                         />
-                            {this.state.loading && Boolean(this.state.movies.length) && <Skeleton />}
-                            {this.state.movies.length ? <Movies movies={this.state.movies}/>
-                            : <div className={app.moviesNotFound}>Ничего не найдено</div>}
+                            {this.state.loading && Boolean(this.state.movies.length) && 
+                            <Skeleton />
+                            }
+                            {(this.state.movies.length) && !this.state.loading && (
+                            <Movies movies={this.state.movies}/>)}
+                            {!this.state.loading && !Boolean(this.state.movies.length) && (<div className={app.moviesNotFound}>Ничего не найдено</div>)}
                         
                         <Pagination
                             totalPages={this.state.totalPages}
