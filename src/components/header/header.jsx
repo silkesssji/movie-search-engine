@@ -4,14 +4,14 @@ import header from "./header.module.scss";
 export const Header = ({
     backgroundPath, changeRequest
 }) => {
-    return(
+    return (
         <header className={header.header}
             style={
                 {
                     backgroundImage:
-                        backgroundPath.length 
+                        backgroundPath.length
                             ? `url(https://image.tmdb.org/t/p/original/${backgroundPath}`
-                            :  "none",
+                            : "none",
                     transition: 'background-image 1s ease',
                 }
             }

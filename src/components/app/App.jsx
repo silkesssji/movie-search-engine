@@ -138,19 +138,19 @@ export class App extends React.Component {
     render() {
         return (
             <>
-                <Header 
-                    backgroundPath={this.state.backgroundPath} 
-                    changeRequest={this.changeRequest} 
+                <Header
+                    backgroundPath={this.state.backgroundPath}
+                    changeRequest={this.changeRequest}
                 />
                 <main className={app.main}>
                     <div className={app.filtersWrapper}>
                         {this.genres &&
-                        <Filters
-                            onChange={this.handleCheckboxChange}
-                            existingGenres={this.genres}
-                            choosedGenres={this.state.choosedGenres}
-                            allCheckbox={this.state.allGenres}
-                        />
+                            <Filters
+                                onChange={this.handleCheckboxChange}
+                                existingGenres={this.genres}
+                                choosedGenres={this.state.choosedGenres}
+                                allCheckbox={this.state.allGenres}
+                            />
                         }
                     </div>
                     <div className={app.wrapper}>
@@ -161,18 +161,18 @@ export class App extends React.Component {
                         />
 
                         {this.state.loading &&
-                        Boolean(this.state.movies.length) &&
-                        <Skeleton />
+                            Boolean(this.state.movies.length) &&
+                            <Skeleton />
                         }
 
                         {Boolean(this.state.movies.length) &&
-                        !this.state.loading && 
-                        (<Movies movies={this.state.movies} />)
+                            !this.state.loading &&
+                            (<Movies movies={this.state.movies} />)
                         }
 
-                        {!this.state.loading && 
-                        !Boolean(this.state.movies.length) &&
-                        (<div className={app.moviesNotFound}>Ничего не найдено</div>)
+                        {!this.state.loading &&
+                            !Boolean(this.state.movies.length) &&
+                            (<div className={app.moviesNotFound}>Ничего не найдено</div>)
                         }
 
                         <Pagination
