@@ -7,21 +7,25 @@ export const Filters = ({
 }) => {
     return(
         <div className={filters.container}>
-            <h2 className={filters.heading}>Adult</h2>
+            <h2 className={filters.heading}>
+                Adult
+            </h2>
             <Checkbox id='checkboxFilterPanel1'
                 label="Adult"
                 checked={adult}
                 value="adult"
                 onChange={onChange}
             />
-            <h2 className={filters.heading}>Genres</h2>
+            <h2 className={filters.heading}>
+                Genres
+            </h2>
             <Checkbox id='checkboxAllFilters'
                 label='All Genres'
                 checked={allCheckbox}
                 value='All'
                 onChange={onChange}
             />
-            <h2 className={filters.heading}> </h2>
+            {/* <h2 className={filters.heading}> </h2> */}
             {existingGenres && existingGenres.map((elem, index) => 
                 <Checkbox id={`checkbox${index}`}
                 key={index}

@@ -1,7 +1,7 @@
 import React from 'react';
 import pagination from "./pagination.module.scss";
 import cn from 'classnames';
-import { generatePagination } from '../../lib/pagesGeneration';
+import { generatePagination } from '../../lib/generatePagintaion';
 
 export const Pagination = ({
     totalPages,
