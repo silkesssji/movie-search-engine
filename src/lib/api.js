@@ -13,6 +13,12 @@ export const api = {
         );
         return response.json();
     },
+    async getGenres() {
+        const response = await fetch(
+            `${this._path}/genre/movie/list?api_key=${apiKey}&language=en-US`
+        )
+        return response.json();
+    },
     async trends(type = 'day', page, signal) {
         const response = await fetch(
             `${this._path}/trending/movie/${type}?api_key=${apiKey}&page=${page}`,
