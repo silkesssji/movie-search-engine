@@ -2,7 +2,7 @@
 
 This is a search engine built with ReactJS and a [TMDB](https://developers.themoviedb.org/) database for front-end practice.
 
-![](https://github.com/silkesssji/movie-search-engine/blob/main/preview.png)
+![](https://github.com/silkesssji/movie-search-engine/blob/main/src/img/preview.png)
 
 ## Demo
 
