@@ -19,8 +19,8 @@ export class App extends React.Component {
             page: 1,
             backgroundPath: '',
             requestValue: '',
-            totalPages: 1,
             adult: false,
+            totalPages: 1,
             loading: false,
             allGenres: true,
             choosedGenres: [],
@@ -74,6 +74,11 @@ export class App extends React.Component {
         if (loading) {
             return false;
         }
+        if (history.pushState) {
+            var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname +
+                `?page=${this.state.page}&request=${this.state.requestValue}&adult=${this.state.adult}`;
+            window.history.pushState({ path: newurl }, '', newurl);
+        }
     }
 
     handleCheckboxChange = (e) => {
@@ -110,19 +115,39 @@ export class App extends React.Component {
     componentDidMount = async () => {
         this.setState({ loading: true });
         await this.getGenres();
-        const requestedResponse = await api.trends('day', 1);
-        this.setState({
-            totalPages: requestedResponse.total_pages,
-            movies: requestedResponse.results,
-            backgroundPath: requestedResponse.results[getRandomInteger(0, 20)].poster_path,
-            loading: false,
-        });
+        if (this.props.queryParams.get('adult') === 'true') {
+            this.setState({ adult: true })
+        }
+        const queryPage = this.props.queryParams.get('page');
+        const queryRequestValue = this.props.queryParams.get('request');
+        if (queryPage) {
+            this.setState({ page: Number(queryPage) });
+        } else {
+            this.setState({ page: 1 });
+        }
+        if (queryRequestValue) {
+            this.setState({ requestValue: queryRequestValue });
+        } else {
+            this.setState({ requestValue: '' })
+        }
+
         if (this.state.allGenres) {
             this.setState({ choosedGenres: [...this.genres] })
         }
-        for (const param of this.props.queryParams) {
-            console.log(param)
+        let firstResponse;
+        if (this.state.requestValue === '') {
+            firstResponse = await api.trends('day', this.state.page);
+        } else {
+            firstResponse = await api.search(this.state.requestValue, this.state.page, this.state.adult);
         }
+        const backgroundResponse = await api.trends('day', 1);
+        const initialBg = backgroundResponse.results[getRandomInteger(0, 20)].backdrop_path;
+        this.setState({
+            backgroundPath: initialBg,
+            totalPages: firstResponse.total_pages,
+            movies: firstResponse.results,
+            loading: false
+        });
     }
 
     render() {
@@ -137,6 +162,7 @@ export class App extends React.Component {
                     <div className={app.filtersWrapper}>
                         {this.genres &&
                             <Filters
+                                adult={this.state.adult}
                                 onChange={this.handleCheckboxChange}
                                 existingGenres={this.genres}
                                 choosedGenres={this.state.choosedGenres}
