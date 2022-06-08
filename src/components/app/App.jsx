@@ -75,9 +75,14 @@ export class App extends React.Component {
             return false;
         }
         if (history.pushState) {
-            var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname +
-                `?page=${this.state.page}${this.state.requestValue !== '' ? `&request=${this.state.requestValue}` : ''}${this.state.adult ? '&adult' : ''}`
-            window.history.pushState({ path: newurl }, '', newurl);
+            const paramsObj = new URLSearchParams({
+                page: this.state.page,
+                adult: this.state.adult
+            });
+            if (this.state.requestValue !== '') {
+                paramsObj.append('request', this.state.requestValue);
+            }
+            window.history.pushState('', '', `?${paramsObj}`);
         }
     }
 
@@ -115,11 +120,12 @@ export class App extends React.Component {
     componentDidMount = async () => {
         this.setState({ loading: true });
         await this.getGenres();
-        if (this.props.queryParams.has('adult')) {
-            this.setState({ adult: true })
-        }
+        const queryAdult = this.props.queryParams.get('adult');
         const queryPage = this.props.queryParams.get('page');
         const queryRequestValue = this.props.queryParams.has('request') ? this.props.queryParams.get('request') : null;
+        if (queryAdult) {
+            this.setState({ adult: true });
+        }
         if (queryPage) {
             this.setState({ page: Number(queryPage) });
         } else {
@@ -132,7 +138,7 @@ export class App extends React.Component {
         }
 
         if (this.state.allGenres) {
-            this.setState({ choosedGenres: [...this.genres] })
+            this.setState({ choosedGenres: [...this.genres] });
         }
         let firstResponse;
         if (this.state.requestValue === '') {
