@@ -76,7 +76,7 @@ export class App extends React.Component {
         }
         if (history.pushState) {
             var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname +
-                `?page=${this.state.page}&request=${this.state.requestValue}&adult=${this.state.adult}`;
+                `?page=${this.state.page}${this.state.requestValue !== '' ? `&request=${this.state.requestValue}` : ''}${this.state.adult ? '&adult' : ''}`
             window.history.pushState({ path: newurl }, '', newurl);
         }
     }
@@ -115,11 +115,11 @@ export class App extends React.Component {
     componentDidMount = async () => {
         this.setState({ loading: true });
         await this.getGenres();
-        if (this.props.queryParams.get('adult') === 'true') {
+        if (this.props.queryParams.has('adult')) {
             this.setState({ adult: true })
         }
         const queryPage = this.props.queryParams.get('page');
-        const queryRequestValue = this.props.queryParams.get('request');
+        const queryRequestValue = this.props.queryParams.has('request') ? this.props.queryParams.get('request') : null;
         if (queryPage) {
             this.setState({ page: Number(queryPage) });
         } else {
