@@ -8,4 +8,4 @@ const queryParams = new URLSearchParams(window.location.search)
 
 const container = document.getElementById('root');
 const root = createRoot(container);
-root.render(<App queryParams={queryParams} />);
+root.render(<App initialQueryParams={queryParams} />);

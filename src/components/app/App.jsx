@@ -1,6 +1,6 @@
 import React from 'react';
 
-import app from "./app.module.scss";
+import styles from "./app.module.scss";
 import { Pagination } from '../pagination/pagination';
 import { Movies } from '../movies/movies';
 import { Footer } from '../footer/footer';
@@ -17,14 +17,18 @@ export class App extends React.Component {
         this.state = {
             movies: [],
             page: 1,
+            mounting: true,
             backgroundPath: '',
             totalPages: 1,
-            loading: false,
+            error: false,
+            loading: true,
             choosedGenres: [],
+            requestValue: '',
+            adult: false,
         }
     }
 
-    fetchData = async () => {
+    fetchMovies = async () => {
         this.setState({ loading: true });
 
         if (this.abort) {
@@ -32,33 +36,38 @@ export class App extends React.Component {
         }
 
         this.abort = new AbortController();
-        const fetchedMovies = (this.state.requestValue) ? (
-            await api.search(
+        let response = this.state.requestValue
+            ? await api.search(
                 this.state.requestValue,
                 this.state.page,
                 this.state.adult,
                 this.abort.signal
-            )) : (
-            await api.trends(
+            )
+            : await api.trends(
                 'day',
                 this.state.page,
                 this.abort.signal
-            )
-        )
-        this.setState({
-            totalPages: fetchedMovies.total_pages,
-            movies: fetchedMovies.results,
-            loading: false
-        });
+            );
+        if (response.responseError) {
+            this.setState({ error: response.responseError });
+        } else {
+            const fetchedMovies = response.responseJson;
+            this.setState({
+                totalPages: fetchedMovies.total_pages,
+                movies: fetchedMovies.results,
+                loading: false,
+                error: false
+            });
+        }
 
         this.abort = null;
     }
 
-    changePage = (page) => {
+    handlePageChange = (page) => {
         this.setState({ page });
     }
 
-    changeRequest = debounce((e) => {
+    handleRequestChange = debounce((e) => {
         if (e.target.value.replace(/\s/g, '')) {
             this.setState({
                 page: 1,
@@ -69,35 +78,38 @@ export class App extends React.Component {
         }
     }, 300)
 
-    checkSelectionOfAllGenres = (allGenres, choosedGenres) => {
-        return allGenres.every((elem) => choosedGenres.includes(elem))
+    areAllGenresChecked = (allGenres, choosedGenres) => {
+        return allGenres.every((genre) => choosedGenres.includes(genre))
+    }
+
+    updateHistoryQueryParams = ({ page, adult, requestValue }) => {
+        if (history.pushState) {
+            const paramsObj = new URLSearchParams({
+                page,
+                adult,
+            });
+            if (this.state.requestValue !== '') {
+                paramsObj.append('request', requestValue);
+            }
+            window.history.pushState('', '', `?${paramsObj}`);
+        }
     }
 
     componentDidUpdate(_, prevState) {
         const { page, requestValue, adult } = this.state;
-        if (page !== prevState.page
-            || (requestValue !== prevState.requestValue)
-            || (adult !== prevState.adult && requestValue !== '')) {
+        if ((page !== prevState.page
+            || requestValue !== prevState.requestValue
+            || adult !== prevState.adult) && this.state.mounting === false
+        ) {
+            this.updateHistoryQueryParams({ page, requestValue, adult })
             if ((requestValue !== undefined)) {
-                this.fetchData();
+                this.fetchMovies();
             }
         }
-
-        if (history.pushState) {
-            const paramsObj = new URLSearchParams({
-                page: this.state.page,
-                adult: this.state.adult
-            });
-            if (this.state.requestValue !== '') {
-                paramsObj.append('request', this.state.requestValue);
-            }
-            window.history.pushState('', '', `?${paramsObj}`);
-        }
-
     }
 
     chooseAllGenresOption = () => {
-        const allGenresChecked = this.checkSelectionOfAllGenres(this.state.genres, this.state.choosedGenres);
+        const allGenresChecked = this.areAllGenresChecked(this.state.genres, this.state.choosedGenres);
         if (allGenresChecked) {
             this.setState({ choosedGenres: [] })
         } else {
@@ -106,74 +118,63 @@ export class App extends React.Component {
     }
 
     handleCheckboxChange = (e) => {
-        const value = e.target.value;
-        if (value === "adult") {
+        const checkboxValue = e.target.value;
+        if (checkboxValue === "adult") {
             this.setState({ adult: !this.state.adult });
-        } else if (value === "all") {
+        } else if (checkboxValue === "all") {
             this.chooseAllGenresOption();
         } else {
-            if (this.state.choosedGenres.includes(value)) {
-                this.setState({ choosedGenres: this.state.choosedGenres.filter((elem) => elem !== value) });
+            if (this.state.choosedGenres.includes(checkboxValue)) {
+                this.setState({ choosedGenres: this.state.choosedGenres.filter((genre) => genre !== checkboxValue) });
             } else {
-                this.setState({ choosedGenres: [...this.state.choosedGenres, e.target.value] });
+                this.setState({ choosedGenres: [...this.state.choosedGenres, checkboxValue] });
             }
         }
         this.setState({ page: 1 })
     }
 
-    fetchGenres = async () => {
+    fetchGenreNames = async () => {
         const json = await api.getGenres();
         const genres = json.genres;
-        return genres.map((elem) => elem.name);
+        return genres.map((genre) => genre.name);
     }
 
     componentDidMount = async () => {
-        this.setState({ loading: true });
-
         this.setState({
-            genres: await this.fetchGenres(),
-            choosedGenres: await this.fetchGenres()
+            genres: await this.fetchGenreNames(),
+            choosedGenres: await this.fetchGenreNames()
         });
 
-        const parsedQueryParams = this.parseQueryParams(this.props.queryParams);
+        const { queryAdult, queryPage, queryRequestValue } = this.getQueryParams(this.props.initialQueryParams);
 
-        if (parsedQueryParams.queryAdult === 'true') {
+        if (queryAdult === 'true') {
             this.setState({ adult: true });
-        } else {
-            this.setState({ adult: false });
         }
-
-        if (parsedQueryParams.queryPage) {
-            this.setState({ page: Number(parsedQueryParams.queryPage) });
-        } else {
-            this.setState({ page: 1 });
+        if (queryPage) {
+            this.setState({ page: Number(queryPage) });
         }
-
-        if (parsedQueryParams.queryRequestValue !== undefined && parsedQueryParams.queryRequestValue) {
-            this.setState({ requestValue: parsedQueryParams.queryRequestValue });
-        } else {
-            this.setState({ requestValue: '' });
+        if (queryRequestValue) {
+            this.setState({ requestValue: queryRequestValue });
         }
-
-        this.fetchData();
-
+        this.setState({ backgroundPath: await this.fetchRandomBackgroundUrl('day') })
+        await this.fetchMovies();
         this.setState({
-            backgroundPath: await this.defineBackgroundPath('day'),
+            mounting: false,
             loading: false
         });
     }
 
-    parseQueryParams = (queryParams) => {
+    getQueryParams = (queryParams) => {
         const queryAdult = queryParams.get('adult');
         const queryPage = queryParams.get('page');
         const queryRequestValue = queryParams.get('request');
         return { queryAdult, queryPage, queryRequestValue }
     }
 
-    defineBackgroundPath = async (timeType) => {
-        const backgroundFetch = await api.trends(timeType, 1);
+    fetchRandomBackgroundUrl = async (timeType) => {
+        const backgroundFetch = await (await api.trends(timeType, 1)).responseJson;
         const backgroundPath = backgroundFetch.results[getRandomInteger(0, 20)].backdrop_path;
-        return (backgroundPath);
+        return backgroundPath;
     }
 
     render() {
@@ -182,46 +183,54 @@ export class App extends React.Component {
             <>
                 <Header
                     backgroundPath={this.state.backgroundPath}
-                    changeRequest={this.changeRequest}
+                    changeRequest={this.handleRequestChange}
                 />
-                <main className={app.main}>
-                    <div className={app.filtersWrapper}>
+                <main className={styles.main}>
+                    <div className={styles.filtersWrapper}>
                         {this.state.genres &&
                             <Filters
                                 adult={this.state.adult}
                                 onChange={this.handleCheckboxChange}
                                 existingGenres={this.state.genres}
                                 choosedGenres={this.state.choosedGenres}
-                                allChecked={this.checkSelectionOfAllGenres(this.state.genres, this.state.choosedGenres)}
+                                allChecked={this.areAllGenresChecked(this.state.genres, this.state.choosedGenres)}
                             />
                         }
                     </div>
-                    <div className={app.wrapper}>
+                    <div className={styles.wrapper}>
                         <Pagination
                             totalPages={this.state.totalPages}
                             page={this.state.page}
-                            changePage={this.changePage}
+                            changePage={this.handlePageChange}
                         />
 
-                        {this.state.loading && Boolean(this.state.totalPages) && <Skeleton />}
+                        {this.state.loading && !this.state.error && <Skeleton />}
 
-                        {Boolean(haveMovies) && !this.state.loading && (
+                        {Boolean(haveMovies) && !this.state.loading && !this.state.error && (
                             <Movies movies={this.state.movies} />
                         )}
 
-                        {!this.state.loading && !haveMovies && (
-                            <div className={app.moviesNotFound}>Ничего не найдено</div>
+                        {this.state.error &&
+                            <div className={styles.errorMessage}>
+                                {this.state.error}
+                                <button className={styles.refreshButton} onClick={this.fetchMovies}>
+                                    Retry
+                                </button>
+                            </div>}
+
+                        {this.state.loading === false && !haveMovies && !this.state.error && (
+                            <div className={styles.moviesNotFound}>Ничего не найдено</div>
                         )}
 
                         <Pagination
                             totalPages={this.state.totalPages}
                             page={this.state.page}
-                            changePage={this.changePage}
+                            changePage={this.handlePageChange}
                         />
                     </div>
-                    <div className={app.bgwrapper}>
+                    <div className={styles.bgwrapper}>
                         <div
-                            className={app.bg}
+                            className={styles.bg}
                             style={{
                                 backgroundImage: this.state.backgroundPath.length
                                     ? `url(https://image.tmdb.org/t/p/original/${this.state.backgroundPath}`

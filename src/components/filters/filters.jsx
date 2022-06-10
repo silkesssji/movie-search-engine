@@ -1,13 +1,17 @@
 import React from 'react';
-import filters from './filters.module.scss';
+import styles from './filters.module.scss';
 import { Checkbox } from '../checkbox/checkbox';
 
 export const Filters = ({
-    adult, onChange, existingGenres, choosedGenres, allChecked
+    adult,
+    onChange,
+    existingGenres,
+    choosedGenres,
+    allChecked,
 }) => {
     return (
-        <div className={filters.container}>
-            <h2 className={filters.heading}>
+        <div className={styles.container}>
+            <h2 className={styles.heading}>
                 Adult
             </h2>
             <Checkbox id='checkboxFilterPanel1'
@@ -16,7 +20,7 @@ export const Filters = ({
                 value="adult"
                 onChange={onChange}
             />
-            <h2 className={filters.heading}>
+            <h2 className={styles.heading}>
                 Genres
             </h2>
             <Checkbox id='checkboxAllFilters'
@@ -25,12 +29,12 @@ export const Filters = ({
                 value='all'
                 onChange={onChange}
             />
-            {existingGenres && existingGenres.map((elem, index) =>
+            {existingGenres && existingGenres.map((genre, index) =>
                 <Checkbox id={`checkbox${index}`}
                     key={index}
-                    label={elem}
-                    checked={choosedGenres.includes(elem)}
-                    value={elem}
+                    label={genre}
+                    checked={choosedGenres.includes(genre)}
+                    value={genre}
                     onChange={onChange}
                 />
             )}

@@ -1,12 +1,12 @@
 import React from 'react';
-import header from "./header.module.scss";
+import styles from "./header.module.scss";
 
 export const Header = ({
     backgroundPath, changeRequest
 }) => {
     return (
         <header
-            className={header.header}
+            className={styles.header}
             style={{
                 backgroundImage:
                     backgroundPath.length
@@ -15,10 +15,10 @@ export const Header = ({
                 transition: 'background-image 1s ease',
             }}
         >
-            <h1 className={header.heading}>MOVIESEARCH</h1>
+            <h1 className={styles.heading}>MOVIESEARCH</h1>
             <form autoComplete="on">
                 <input
-                    className={header.input}
+                    className={styles.input}
                     type="search"
                     id='searchInput'
                     name='title'
