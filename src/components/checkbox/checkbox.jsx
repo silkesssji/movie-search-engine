@@ -9,7 +9,7 @@ export const Checkbox = ({
         <label
             className={cn(
                 style.checkbox,
-                { [style.checkbox_all]: value === 'All' },
+                { [style.checkbox_all]: value === 'all' },
                 { [style.checkbox_checked]: checked },
             )
             }>

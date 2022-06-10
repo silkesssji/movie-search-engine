@@ -18,36 +18,39 @@ export class App extends React.Component {
             movies: [],
             page: 1,
             backgroundPath: '',
-            requestValue: '',
-            adult: false,
             totalPages: 1,
             loading: false,
-            allGenres: true,
             choosedGenres: [],
         }
     }
 
     fetchData = async () => {
         this.setState({ loading: true });
+
         if (this.abort) {
             this.abort.abort();
         }
 
         this.abort = new AbortController();
-
-        let fetchedMovies;
-
-        if (this.state.requestValue !== '') {
-            fetchedMovies = await api.search(this.state.requestValue, this.state.page, this.state.adult, this.abort.signal);
-        } else {
-            fetchedMovies = await api.trends('day', this.state.page, this.abort.signal);
-        }
-
+        const fetchedMovies = (this.state.requestValue) ? (
+            await api.search(
+                this.state.requestValue,
+                this.state.page,
+                this.state.adult,
+                this.abort.signal
+            )) : (
+            await api.trends(
+                'day',
+                this.state.page,
+                this.abort.signal
+            )
+        )
         this.setState({
             totalPages: fetchedMovies.total_pages,
             movies: fetchedMovies.results,
             loading: false
         });
+
         this.abort = null;
     }
 
@@ -66,14 +69,20 @@ export class App extends React.Component {
         }
     }, 300)
 
+    checkSelectionOfAllGenres = (allGenres, choosedGenres) => {
+        return allGenres.every((elem) => choosedGenres.includes(elem))
+    }
+
     componentDidUpdate(_, prevState) {
-        const { page, requestValue, adult, loading, choosedGenres } = this.state;
-        if (page !== prevState.page || requestValue !== prevState.requestValue || (adult !== prevState.adult && requestValue !== '')) {
-            this.fetchData();
+        const { page, requestValue, adult } = this.state;
+        if (page !== prevState.page
+            || (requestValue !== prevState.requestValue)
+            || (adult !== prevState.adult && requestValue !== '')) {
+            if ((requestValue !== undefined)) {
+                this.fetchData();
+            }
         }
-        if (loading) {
-            return false;
-        }
+
         if (history.pushState) {
             const paramsObj = new URLSearchParams({
                 page: this.state.page,
@@ -84,80 +93,91 @@ export class App extends React.Component {
             }
             window.history.pushState('', '', `?${paramsObj}`);
         }
+
+    }
+
+    chooseAllGenresOption = () => {
+        const allGenresChecked = this.checkSelectionOfAllGenres(this.state.genres, this.state.choosedGenres);
+        if (allGenresChecked) {
+            this.setState({ choosedGenres: [] })
+        } else {
+            this.setState({ choosedGenres: this.state.genres })
+        }
     }
 
     handleCheckboxChange = (e) => {
         const value = e.target.value;
         if (value === "adult") {
-            this.setState({ adult: !this.state.adult })
-        } else if (value === "All") {
-            this.setState({
-                allGenres: !this.state.allGenres,
-                choosedGenres: [...this.genres]
-            }, () => {
-                if (this.state.allGenres) {
-                    this.setState({ choosedGenres: [...this.genres] })
-                } else {
-                    this.setState({ choosedGenres: [] })
-                }
-            })
+            this.setState({ adult: !this.state.adult });
+        } else if (value === "all") {
+            this.chooseAllGenresOption();
         } else {
             if (this.state.choosedGenres.includes(value)) {
-                this.setState({ choosedGenres: this.state.choosedGenres.filter((elem) => elem !== value) })
+                this.setState({ choosedGenres: this.state.choosedGenres.filter((elem) => elem !== value) });
             } else {
-                this.setState({ choosedGenres: [...this.state.choosedGenres, e.target.value] })
+                this.setState({ choosedGenres: [...this.state.choosedGenres, e.target.value] });
             }
         }
         this.setState({ page: 1 })
     }
 
-    getGenres = async () => {
+    fetchGenres = async () => {
         const json = await api.getGenres();
         const genres = json.genres;
-        this.genres = [...genres.map((elem) => elem.name)];
+        return genres.map((elem) => elem.name);
     }
 
     componentDidMount = async () => {
         this.setState({ loading: true });
-        await this.getGenres();
-        const queryAdult = this.props.queryParams.get('adult');
-        const queryPage = this.props.queryParams.get('page');
-        const queryRequestValue = this.props.queryParams.has('request') ? this.props.queryParams.get('request') : null;
-        if (queryAdult) {
+
+        this.setState({
+            genres: await this.fetchGenres(),
+            choosedGenres: await this.fetchGenres()
+        });
+
+        const parsedQueryParams = this.parseQueryParams(this.props.queryParams);
+
+        if (parsedQueryParams.queryAdult === 'true') {
             this.setState({ adult: true });
+        } else {
+            this.setState({ adult: false });
         }
-        if (queryPage) {
-            this.setState({ page: Number(queryPage) });
+
+        if (parsedQueryParams.queryPage) {
+            this.setState({ page: Number(parsedQueryParams.queryPage) });
         } else {
             this.setState({ page: 1 });
         }
-        if (queryRequestValue) {
-            this.setState({ requestValue: queryRequestValue });
+
+        if (parsedQueryParams.queryRequestValue !== undefined && parsedQueryParams.queryRequestValue) {
+            this.setState({ requestValue: parsedQueryParams.queryRequestValue });
         } else {
-            this.setState({ requestValue: '' })
+            this.setState({ requestValue: '' });
         }
 
-        if (this.state.allGenres) {
-            this.setState({ choosedGenres: [...this.genres] });
-        }
-        let firstResponse;
-        if (this.state.requestValue === '') {
-            firstResponse = await api.trends('day', this.state.page);
-        } else {
-            firstResponse = await api.search(this.state.requestValue, this.state.page, this.state.adult);
-        }
-        const backgroundResponse = await api.trends('day', 1);
-        const initialBg = backgroundResponse.results[getRandomInteger(0, 20)].backdrop_path;
+        this.fetchData();
+
         this.setState({
-            backgroundPath: initialBg,
-            totalPages: firstResponse.total_pages,
-            movies: firstResponse.results,
+            backgroundPath: await this.defineBackgroundPath('day'),
             loading: false
         });
     }
 
+    parseQueryParams = (queryParams) => {
+        const queryAdult = queryParams.get('adult');
+        const queryPage = queryParams.get('page');
+        const queryRequestValue = queryParams.get('request');
+        return { queryAdult, queryPage, queryRequestValue }
+    }
+
+    defineBackgroundPath = async (timeType) => {
+        const backgroundFetch = await api.trends(timeType, 1);
+        const backgroundPath = backgroundFetch.results[getRandomInteger(0, 20)].backdrop_path;
+        return (backgroundPath);
+    }
+
     render() {
-        const haveMovies = Boolean(this.state.movies.length)
+        const haveMovies = this.state.movies.length;
         return (
             <>
                 <Header
@@ -166,13 +186,13 @@ export class App extends React.Component {
                 />
                 <main className={app.main}>
                     <div className={app.filtersWrapper}>
-                        {this.genres &&
+                        {this.state.genres &&
                             <Filters
                                 adult={this.state.adult}
                                 onChange={this.handleCheckboxChange}
-                                existingGenres={this.genres}
+                                existingGenres={this.state.genres}
                                 choosedGenres={this.state.choosedGenres}
-                                allCheckbox={this.state.allGenres}
+                                allChecked={this.checkSelectionOfAllGenres(this.state.genres, this.state.choosedGenres)}
                             />
                         }
                     </div>
@@ -185,7 +205,7 @@ export class App extends React.Component {
 
                         {this.state.loading && Boolean(this.state.totalPages) && <Skeleton />}
 
-                        {haveMovies && !this.state.loading && (
+                        {Boolean(haveMovies) && !this.state.loading && (
                             <Movies movies={this.state.movies} />
                         )}
 

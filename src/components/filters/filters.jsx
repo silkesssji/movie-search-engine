@@ -3,7 +3,7 @@ import filters from './filters.module.scss';
 import { Checkbox } from '../checkbox/checkbox';
 
 export const Filters = ({
-    adult, onChange, existingGenres, choosedGenres
+    adult, onChange, existingGenres, choosedGenres, allChecked
 }) => {
     return (
         <div className={filters.container}>
@@ -21,8 +21,8 @@ export const Filters = ({
             </h2>
             <Checkbox id='checkboxAllFilters'
                 label='All Genres'
-                checked={existingGenres.every((elem) => choosedGenres.includes(elem))}
-                value='All'
+                checked={allChecked}
+                value='all'
                 onChange={onChange}
             />
             {existingGenres && existingGenres.map((elem, index) =>
