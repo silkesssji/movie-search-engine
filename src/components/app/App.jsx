@@ -36,28 +36,27 @@ export class App extends React.Component {
         }
 
         this.abort = new AbortController();
-        let response = this.state.requestValue
-            ? await api.search(
-                this.state.requestValue,
-                this.state.page,
-                this.state.adult,
-                this.abort.signal
-            )
-            : await api.trends(
-                'day',
-                this.state.page,
-                this.abort.signal
-            );
-        if (response.responseError) {
-            this.setState({ error: response.responseError });
-        } else {
-            const fetchedMovies = response.responseJson;
+        try {
+            const fetchedMovies = this.state.requestValue
+                ? await api.search(
+                    this.state.requestValue,
+                    this.state.page,
+                    this.state.adult,
+                    this.abort.signal
+                )
+                : await api.trends(
+                    'day',
+                    this.state.page,
+                    this.abort.signal
+                );
             this.setState({
                 totalPages: fetchedMovies.total_pages,
                 movies: fetchedMovies.results,
                 loading: false,
                 error: false
             });
+        } catch (e) {
+            this.setState({ error: e.message });
         }
 
         this.abort = null;
@@ -172,8 +171,9 @@ export class App extends React.Component {
     }
 
     fetchRandomBackgroundUrl = async (timeType) => {
-        const backgroundFetch = await (await api.trends(timeType, 1)).responseJson;
-        const backgroundPath = backgroundFetch.results[getRandomInteger(0, 20)].backdrop_path;
+        const backgroundFetch = await api.trends(timeType, 1);
+        // debugger;
+        const backgroundPath = backgroundFetch.results[getRandomInteger(0, 19)].backdrop_path;
         return backgroundPath;
     }
 
