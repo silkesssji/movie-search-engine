@@ -20,7 +20,10 @@ export class App extends React.Component {
             mounting: true,
             backgroundPath: '',
             totalPages: 1,
-            error: false,
+            errors: {
+                moviesFail: null,
+                genresFail: null
+            },
             loading: true,
             choosedGenres: [],
             requestValue: '',
@@ -52,13 +55,13 @@ export class App extends React.Component {
             this.setState({
                 totalPages: fetchedMovies.total_pages,
                 movies: fetchedMovies.results,
-                loading: false,
-                error: false
+                loading: false
             });
+            this.state.errors.moviesFail = null;
         } catch (e) {
-            this.setState({ error: e.message });
+            this.state.errors.moviesFail = e.message;
+            this.setState({ loading: false })
         }
-
         this.abort = null;
     }
 
@@ -95,7 +98,7 @@ export class App extends React.Component {
     }
 
     componentDidUpdate(_, prevState) {
-        const { page, requestValue, adult } = this.state;
+        const { page, requestValue, adult, mounting } = this.state;
         if ((page !== prevState.page
             || requestValue !== prevState.requestValue
             || adult !== prevState.adult) && this.state.mounting === false
@@ -104,6 +107,12 @@ export class App extends React.Component {
             if ((requestValue !== undefined)) {
                 this.fetchMovies();
             }
+        }
+        if (this.state.errors.moviesFail && this.state.genresFail) {
+            this.setState({
+                mounting: false,
+                loading: false
+            })
         }
     }
 
@@ -133,9 +142,18 @@ export class App extends React.Component {
     }
 
     fetchGenreNames = async () => {
-        const json = await api.getGenres();
-        const genres = json.genres;
-        return genres.map((genre) => genre.name);
+        try {
+            const json = await api.getGenres();
+            const genres = json.genres;
+            const genresNames = genres.map((genre) => genre.name);
+            this.state.errors.genresFail = null;
+            return genresNames;
+        } catch (e) {
+            this.state.errors.genresFail = e.message;
+            this.setState({
+                loading: false,
+            })
+        }
     }
 
     componentDidMount = async () => {
@@ -171,10 +189,13 @@ export class App extends React.Component {
     }
 
     fetchRandomBackgroundUrl = async (timeType) => {
-        const backgroundFetch = await api.trends(timeType, 1);
-        // debugger;
-        const backgroundPath = backgroundFetch.results[getRandomInteger(0, 19)].backdrop_path;
-        return backgroundPath;
+        try {
+            const backgroundFetch = await api.trends(timeType, 1);
+            const backgroundPath = backgroundFetch.results[getRandomInteger(0, 19)].backdrop_path;
+            return backgroundPath;
+        } catch {
+            return []
+        }
     }
 
     render() {
@@ -187,7 +208,7 @@ export class App extends React.Component {
                 />
                 <main className={styles.main}>
                     <div className={styles.filtersWrapper}>
-                        {this.state.genres &&
+                        {this.state.genres && this.state.errors.genresFail === null &&
                             <Filters
                                 adult={this.state.adult}
                                 onChange={this.handleCheckboxChange}
@@ -196,45 +217,52 @@ export class App extends React.Component {
                                 allChecked={this.areAllGenresChecked(this.state.genres, this.state.choosedGenres)}
                             />
                         }
+                        {this.state.errors.genresFail !== null && !this.state.loading &&
+                            <div className={styles.errorMessage}>
+                                Filters error
+                                <button className={styles.refreshButton} onClick={() => window.location.reload()}>
+                                    Retry
+                                </button>
+                            </div>}
                     </div>
                     <div className={styles.wrapper}>
-                        <Pagination
+                        {this.state.errors.moviesFail === null && <Pagination
                             totalPages={this.state.totalPages}
                             page={this.state.page}
                             changePage={this.handlePageChange}
-                        />
+                        />}
 
-                        {this.state.loading && !this.state.error && <Skeleton />}
+                        {this.state.loading && this.state.errors.moviesFail === null && <Skeleton />}
 
-                        {Boolean(haveMovies) && !this.state.loading && !this.state.error && (
+                        {Boolean(haveMovies) && !this.state.loading && this.state.errors.moviesFail === null && (
                             <Movies movies={this.state.movies} />
                         )}
 
-                        {this.state.error &&
+                        {this.state.errors.moviesFail !== null && !this.state.loading &&
                             <div className={styles.errorMessage}>
-                                {this.state.error}
+                                {this.state.errors.moviesFail}
                                 <button className={styles.refreshButton} onClick={this.fetchMovies}>
                                     Retry
                                 </button>
                             </div>}
 
-                        {this.state.loading === false && !haveMovies && !this.state.error && (
+                        {this.state.loading === false && !haveMovies && this.state.errors.moviesFail === null && (
                             <div className={styles.moviesNotFound}>Ничего не найдено</div>
                         )}
 
-                        <Pagination
+                        {this.state.errors.moviesFail === null && <Pagination
                             totalPages={this.state.totalPages}
                             page={this.state.page}
                             changePage={this.handlePageChange}
-                        />
+                        />}
                     </div>
                     <div className={styles.bgwrapper}>
                         <div
                             className={styles.bg}
                             style={{
-                                backgroundImage: this.state.backgroundPath.length
+                                background: this.state.backgroundPath.length
                                     ? `url(https://image.tmdb.org/t/p/original/${this.state.backgroundPath}`
-                                    : 'none'
+                                    : 'grey'
                             }}
                         />
                     </div>

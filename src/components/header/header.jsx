@@ -8,10 +8,10 @@ export const Header = ({
         <header
             className={styles.header}
             style={{
-                backgroundImage:
+                background:
                     backgroundPath.length
                         ? `url(https://image.tmdb.org/t/p/original/${backgroundPath}`
-                        : "none",
+                        : "gray",
                 transition: 'background-image 1s ease',
             }}
         >

@@ -1,5 +1,3 @@
-import { findRenderedDOMComponentWithClass } from "react-dom/test-utils";
-
 const apiKey = '00479108b898bdd0ebeed080d6bd33fe';
 
 export const api = {
@@ -20,7 +18,7 @@ export const api = {
     async trends(type = 'day', page, signal) {
         const response = await fetch(`${this._path}/trending/movie/${type}?api_key=${apiKey}&page=${page}`, {
             signal
-        })
+        });
         return response.json();
     }
 }
