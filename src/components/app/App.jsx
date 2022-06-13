@@ -10,6 +10,7 @@ import { Filters } from '../filters/filters';
 import { debounce } from '../../lib/debounce';
 import { api } from '../../lib/api';
 import { getRandomInteger } from '../../lib/getRandomInteger';
+import { Error } from '../error/error';
 
 export class App extends React.Component {
     constructor(props) {
@@ -194,7 +195,7 @@ export class App extends React.Component {
             const backgroundPath = backgroundFetch.results[getRandomInteger(0, 19)].backdrop_path;
             return backgroundPath;
         } catch {
-            return []
+            return ''
         }
     }
 
@@ -217,20 +218,21 @@ export class App extends React.Component {
                                 allChecked={this.areAllGenresChecked(this.state.genres, this.state.choosedGenres)}
                             />
                         }
-                        {this.state.errors.genresFail !== null && !this.state.loading &&
-                            <div className={styles.errorMessage}>
-                                Filters error
-                                <button className={styles.refreshButton} onClick={() => window.location.reload()}>
-                                    Retry
-                                </button>
-                            </div>}
+                        {this.state.errors.genresFail !== null && !this.state.loading && (
+                            <Error
+                                message={'Filters error'}
+                                onClick={() => window.location.reload()}
+                            />
+                        )}
                     </div>
                     <div className={styles.wrapper}>
-                        {this.state.errors.moviesFail === null && <Pagination
-                            totalPages={this.state.totalPages}
-                            page={this.state.page}
-                            changePage={this.handlePageChange}
-                        />}
+                        {this.state.errors.moviesFail === null && (
+                            <Pagination
+                                totalPages={this.state.totalPages}
+                                page={this.state.page}
+                                changePage={this.handlePageChange}
+                            />
+                        )}
 
                         {this.state.loading && this.state.errors.moviesFail === null && <Skeleton />}
 
@@ -238,23 +240,24 @@ export class App extends React.Component {
                             <Movies movies={this.state.movies} />
                         )}
 
-                        {this.state.errors.moviesFail !== null && !this.state.loading &&
-                            <div className={styles.errorMessage}>
-                                {this.state.errors.moviesFail}
-                                <button className={styles.refreshButton} onClick={this.fetchMovies}>
-                                    Retry
-                                </button>
-                            </div>}
+                        {this.state.errors.moviesFail !== null && !this.state.loading && (
+                            <Error
+                                message={this.state.errors.moviesFail}
+                                onClick={this.fetchMovies}
+                            />
+                        )}
 
                         {this.state.loading === false && !haveMovies && this.state.errors.moviesFail === null && (
                             <div className={styles.moviesNotFound}>Ничего не найдено</div>
                         )}
 
-                        {this.state.errors.moviesFail === null && <Pagination
-                            totalPages={this.state.totalPages}
-                            page={this.state.page}
-                            changePage={this.handlePageChange}
-                        />}
+                        {this.state.errors.moviesFail === null && (
+                            <Pagination
+                                totalPages={this.state.totalPages}
+                                page={this.state.page}
+                                changePage={this.handlePageChange}
+                            />
+                        )}
                     </div>
                     <div className={styles.bgwrapper}>
                         <div
