@@ -2,6 +2,8 @@
 
 This is a search engine built with ReactJS and a [TMDB](https://developers.themoviedb.org/) database for front-end practice.
 
+[Hook version with movie page](https://github.com/silkesssji/movie-search-engine-hooks)
+
 ![](https://github.com/silkesssji/movie-search-engine/blob/main/src/img/preview.png)
 
 ## Demo
